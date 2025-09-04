@@ -5,6 +5,8 @@
 	
 	// Variables reactivas
 	$: user = $authStore.user;
+	$: currentPath = $page.url.pathname;
+	$: hideNavbar = currentPath === '/login';
 	
 	const handleLogout = () => {
 		authActions.logout();
@@ -12,6 +14,7 @@
 	};
 </script>
 
+{#if !hideNavbar}
 <nav class="navbar navbar-expand-lg sticky-top">
 	<div class="container">
 		<a class="navbar-brand" href="/">
@@ -143,3 +146,4 @@
 		</div>
 	</div>
 </nav>
+{/if}

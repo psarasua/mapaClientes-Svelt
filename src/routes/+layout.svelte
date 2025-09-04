@@ -3,6 +3,7 @@
 	import Layout from '$lib/components/layout/Layout.svelte';
 	import { onMount } from 'svelte';
 	import { authActions } from '$lib/stores/authStore.js';
+	import { Toaster } from 'svelte-french-toast';
 
 	// Importar Bootstrap JS y verificar autenticación
 	onMount(async () => {
@@ -17,3 +18,6 @@
 <Layout>
 	<slot />
 </Layout>
+
+<!-- Toaster de svelte-french-toast configurado para bottom-right -->
+<Toaster position="bottom-right" />

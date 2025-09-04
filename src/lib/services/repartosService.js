@@ -7,7 +7,6 @@ export const repartosService = {
 	getAll: async () => {
 		try {
 			const response = await api.get('/api/repartos');
-			toast.success(`${response.data.count || 0} repartos cargados correctamente`);
 			return response.data;
 		} catch (error) {
 			toast.error(`Error al obtener repartos: ${error.message}`);
@@ -19,7 +18,6 @@ export const repartosService = {
 	getById: async (id) => {
 		try {
 			const response = await api.get(`/api/repartos/${id}`);
-			toast.info(`Reparto ${id} obtenido correctamente`);
 			return response.data;
 		} catch (error) {
 			toast.error(`Error al obtener reparto ${id}: ${error.message}`);
@@ -31,7 +29,6 @@ export const repartosService = {
 	create: async (repartoData) => {
 		try {
 			const response = await api.post('/api/repartos', repartoData);
-			toast.success(`Reparto creado exitosamente`);
 			return response.data;
 		} catch (error) {
 			toast.error(`Error al crear reparto: ${error.message}`);
@@ -43,7 +40,6 @@ export const repartosService = {
 	update: async (id, repartoData) => {
 		try {
 			const response = await api.put(`/api/repartos/${id}`, repartoData);
-			toast.success(`Reparto actualizado exitosamente`);
 			return response.data;
 		} catch (error) {
 			toast.error(`Error al actualizar reparto: ${error.message}`);
@@ -55,7 +51,6 @@ export const repartosService = {
 	delete: async (id) => {
 		try {
 			const response = await api.delete(`/api/repartos/${id}`);
-			toast.success(`Reparto eliminado exitosamente`);
 			return response.data;
 		} catch (error) {
 			toast.error(`Error al eliminar reparto: ${error.message}`);
@@ -92,7 +87,6 @@ export const repartosService = {
 			return response.data;
 		} catch (error) {
 			// Si no existe este endpoint, usar datos del reparto principal
-			toast.warning('Endpoint específico no disponible, usando datos principales');
 			return null;
 		}
 	}

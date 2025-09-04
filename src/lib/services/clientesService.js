@@ -7,7 +7,6 @@ export const clientesService = {
 	getAll: async () => {
 		try {
 			const response = await api.get('/api/clientes');
-			toast.success(`${response.data.count || 0} clientes cargados correctamente`);
 			return response.data;
 		} catch (error) {
 			toast.error(`Error al obtener clientes: ${error.message}`);
@@ -19,7 +18,6 @@ export const clientesService = {
 	getById: async (id) => {
 		try {
 			const response = await api.get(`/api/clientes/${id}`);
-			toast.info(`Cliente ${id} obtenido correctamente`);
 			return response.data;
 		} catch (error) {
 			toast.error(`Error al obtener cliente ${id}: ${error.message}`);
@@ -31,7 +29,6 @@ export const clientesService = {
 	create: async (clienteData) => {
 		try {
 			const response = await api.post('/api/clientes', clienteData);
-			toast.success(`Cliente "${clienteData.nombre}" creado exitosamente`);
 			return response.data;
 		} catch (error) {
 			toast.error(`Error al crear cliente: ${error.message}`);
@@ -43,7 +40,6 @@ export const clientesService = {
 	update: async (id, clienteData) => {
 		try {
 			const response = await api.put(`/api/clientes/${id}`, clienteData);
-			toast.success(`Cliente "${clienteData.nombre}" actualizado exitosamente`);
 			return response.data;
 		} catch (error) {
 			toast.error(`Error al actualizar cliente: ${error.message}`);
@@ -55,7 +51,6 @@ export const clientesService = {
 	delete: async (id) => {
 		try {
 			const response = await api.delete(`/api/clientes/${id}`);
-			toast.success(`Cliente eliminado exitosamente`);
 			return response.data;
 		} catch (error) {
 			toast.error(`Error al eliminar cliente: ${error.message}`);

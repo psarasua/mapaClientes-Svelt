@@ -7,7 +7,6 @@ export const rutasService = {
 	getAll: async () => {
 		try {
 			const response = await api.get('/api/rutas');
-			toast.success(`${response.data.count || 0} rutas cargadas correctamente`);
 			return response.data;
 		} catch (error) {
 			toast.error(`Error al obtener rutas: ${error.message}`);
@@ -19,7 +18,6 @@ export const rutasService = {
 	getById: async (id) => {
 		try {
 			const response = await api.get(`/api/rutas/${id}`);
-			toast.info(`Ruta ${id} obtenida correctamente`);
 			return response.data;
 		} catch (error) {
 			toast.error(`Error al obtener ruta ${id}: ${error.message}`);
@@ -31,7 +29,6 @@ export const rutasService = {
 	create: async (rutaData) => {
 		try {
 			const response = await api.post('/api/rutas', rutaData);
-			toast.success(`Ruta "${rutaData.nombre}" creada exitosamente`);
 			return response.data;
 		} catch (error) {
 			toast.error(`Error al crear ruta: ${error.message}`);
@@ -43,7 +40,6 @@ export const rutasService = {
 	update: async (id, rutaData) => {
 		try {
 			const response = await api.put(`/api/rutas/${id}`, rutaData);
-			toast.success(`Ruta "${rutaData.nombre}" actualizada exitosamente`);
 			return response.data;
 		} catch (error) {
 			toast.error(`Error al actualizar ruta: ${error.message}`);
@@ -55,7 +51,6 @@ export const rutasService = {
 	delete: async (id) => {
 		try {
 			const response = await api.delete(`/api/rutas/${id}`);
-			toast.success(`Ruta eliminada exitosamente`);
 			return response.data;
 		} catch (error) {
 			toast.error(`Error al eliminar ruta: ${error.message}`);

@@ -62,7 +62,6 @@
 	// Cargar todos los datos necesarios
 	const loadAllData = async () => {
 		dataLoading = true;
-		toast.info('Cargando datos del sistema...');
 		
 		try {
 			const [clientesResponse, camionesResponse, rutasResponse] = await Promise.all([
@@ -75,7 +74,6 @@
 			camiones = camionesResponse.data || [];
 			rutas = rutasResponse.data || [];
 			
-			toast.success('Datos del sistema cargados correctamente');
 		} catch (error) {
 			toast.error(`Error al cargar datos del sistema: ${error.message}`);
 		} finally {
@@ -85,7 +83,6 @@
 	
 	// Cargar repartos al montar el componente
 	onMount(async () => {
-		toast.info('Inicializando gestión de repartos...');
 		await loadAllData();
 		repartosActions.loadRepartos();
 	});
@@ -94,14 +91,12 @@
 	const handleCreate = () => {
 		editingReparto = null;
 		showModal = true;
-		toast.info('Abriendo formulario para nuevo reparto');
 	};
 	
 	// Abrir modal para editar reparto
 	const handleEdit = (reparto) => {
 		editingReparto = reparto;
 		showModal = true;
-		toast.info(`Editando reparto #${reparto.id}`);
 	};
 	
 	// Manejar envío del formulario
@@ -131,7 +126,6 @@
 		showModal = false;
 		editingReparto = null;
 		modalLoading = false;
-		toast.info('Formulario cerrado');
 	};
 	
 	// Eliminar reparto con confirmación
@@ -139,12 +133,9 @@
 		if (confirm(`¿Estás seguro de que quieres eliminar el reparto #${reparto.id}?\n\nCliente: ${reparto.cliente_nombre}\nCamión: ${reparto.camion_nombre}\nRuta: ${reparto.ruta_nombre}`)) {
 			try {
 				await repartosActions.deleteReparto(reparto.id);
-				toast.info(`Reparto #${reparto.id} eliminado de la lista`);
 			} catch (error) {
 				toast.error(`Error al eliminar reparto: ${error.message}`);
 			}
-		} else {
-			toast.info('Eliminación cancelada');
 		}
 	};
 	

@@ -23,10 +23,7 @@ api.interceptors.request.use(
 			}
 		}
 		
-		// Solo mostrar toast para requests importantes (no para verificaciones automáticas)
-		if (!config.url?.includes('/verify') && !config.url?.includes('/health')) {
-			toast.info(`API Request: ${config.method?.toUpperCase()} ${config.url}`);
-		}
+		// No mostrar toasts informativos para requests
 		return config;
 	},
 	(error) => {
@@ -38,10 +35,7 @@ api.interceptors.request.use(
 // Interceptor para responses
 api.interceptors.response.use(
 	(response) => {
-		// Solo mostrar toast para responses importantes
-		if (!response.config?.url?.includes('/verify') && !response.config?.url?.includes('/health')) {
-			toast.success(`API Response: ${response.status} ${response.statusText}`);
-		}
+		// No mostrar toasts informativos para responses exitosas
 		return response;
 	},
 	(error) => {

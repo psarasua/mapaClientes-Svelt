@@ -36,7 +36,6 @@
 	
 	// Cargar rutas al montar el componente
 	onMount(() => {
-		toast.info('Inicializando gestión de rutas...');
 		rutasActions.loadRutas();
 	});
 	
@@ -44,14 +43,12 @@
 	const handleCreate = () => {
 		editingRuta = null;
 		showModal = true;
-		toast.info('Abriendo formulario para nueva ruta');
 	};
 	
 	// Abrir modal para editar ruta
 	const handleEdit = (ruta) => {
 		editingRuta = ruta;
 		showModal = true;
-		toast.info(`Editando ruta: "${ruta.nombre}"`);
 	};
 	
 	// Manejar envío del formulario

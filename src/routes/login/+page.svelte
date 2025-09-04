@@ -28,7 +28,7 @@
 </svelte:head>
 
 <div class="min-vh-100 d-flex align-items-center bg-light">
-	<div class="container">
+	<div class="container-fluid px-4">
 		<div class="row justify-content-center">
 			<div class="col-md-6 col-lg-5 col-xl-4">
 				<!-- Logo/Título de la aplicación -->
@@ -41,12 +41,12 @@
 				<!-- Formulario de login -->
 				<LoginForm on:loginSuccess={handleLoginSuccess} />
 				
-				<!-- Enlaces adicionales -->
+				<!-- Información adicional -->
 				<div class="text-center mt-4">
-					<a href="/" class="btn btn-outline-secondary">
-						<i class="bi bi-house me-1"></i>
-						Volver al Inicio
-					</a>
+					<small class="text-muted">
+						<i class="bi bi-shield-lock me-1"></i>
+						Acceso seguro al sistema
+					</small>
 				</div>
 			</div>
 		</div>

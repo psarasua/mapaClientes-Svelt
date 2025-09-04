@@ -7,7 +7,6 @@ export const camionesService = {
 	getAll: async () => {
 		try {
 			const response = await api.get('/api/camiones');
-			toast.success(`${response.data.count || 0} camiones cargados correctamente`);
 			return response.data;
 		} catch (error) {
 			toast.error(`Error al obtener camiones: ${error.message}`);
@@ -19,7 +18,6 @@ export const camionesService = {
 	getById: async (id) => {
 		try {
 			const response = await api.get(`/api/camiones/${id}`);
-			toast.info(`Camión ${id} obtenido correctamente`);
 			return response.data;
 		} catch (error) {
 			toast.error(`Error al obtener camión ${id}: ${error.message}`);
@@ -31,7 +29,6 @@ export const camionesService = {
 	create: async (camionData) => {
 		try {
 			const response = await api.post('/api/camiones', camionData);
-			toast.success(`Camión "${camionData.nombre}" creado exitosamente`);
 			return response.data;
 		} catch (error) {
 			toast.error(`Error al crear camión: ${error.message}`);
@@ -43,7 +40,6 @@ export const camionesService = {
 	update: async (id, camionData) => {
 		try {
 			const response = await api.put(`/api/camiones/${id}`, camionData);
-			toast.success(`Camión "${camionData.nombre}" actualizado exitosamente`);
 			return response.data;
 		} catch (error) {
 			toast.error(`Error al actualizar camión: ${error.message}`);
@@ -55,7 +51,6 @@ export const camionesService = {
 	delete: async (id) => {
 		try {
 			const response = await api.delete(`/api/camiones/${id}`);
-			toast.success(`Camión eliminado exitosamente`);
 			return response.data;
 		} catch (error) {
 			toast.error(`Error al eliminar camión: ${error.message}`);

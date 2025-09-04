@@ -26,17 +26,22 @@
 		errors.email = '';
 		errors.password = '';
 		
+		let hasErrors = false;
+		
 		if (!formData.email.trim()) {
 			errors.email = 'El usuario es obligatorio';
+			hasErrors = true;
 		}
 		
 		if (!formData.password.trim()) {
 			errors.password = 'La contraseña es obligatoria';
+			hasErrors = true;
 		} else if (formData.password.length < 3) {
 			errors.password = 'La contraseña debe tener al menos 3 caracteres';
+			hasErrors = true;
 		}
 		
-		return Object.keys(errors).length === 0;
+		return !hasErrors;
 	};
 	
 	// Manejar envío del formulario

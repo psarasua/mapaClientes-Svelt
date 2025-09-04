@@ -36,7 +36,6 @@
 	
 	// Cargar camiones al montar el componente
 	onMount(() => {
-		toast.info('Inicializando gestión de camiones...');
 		camionesActions.loadCamiones();
 	});
 	
@@ -44,14 +43,12 @@
 	const handleCreate = () => {
 		editingCamion = null;
 		showModal = true;
-		toast.info('Abriendo formulario para nuevo camión');
 	};
 	
 	// Abrir modal para editar camión
 	const handleEdit = (camion) => {
 		editingCamion = camion;
 		showModal = true;
-		toast.info(`Editando camión: "${camion.nombre}"`);
 	};
 	
 	// Manejar envío del formulario

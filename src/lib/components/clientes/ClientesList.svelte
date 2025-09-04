@@ -49,7 +49,6 @@
 	
 	// Cargar clientes al montar el componente
 	onMount(() => {
-		toast.info('Inicializando gestión de clientes...');
 		clientesActions.loadClientes();
 	});
 	
@@ -57,14 +56,12 @@
 	const handleCreate = () => {
 		editingCliente = null;
 		showModal = true;
-		toast.info('Abriendo formulario para nuevo cliente');
 	};
 	
 	// Abrir modal para editar cliente
 	const handleEdit = (cliente) => {
 		editingCliente = cliente;
 		showModal = true;
-		toast.info(`Editando cliente: "${cliente.nombre}"`);
 	};
 	
 	// Manejar envío del formulario

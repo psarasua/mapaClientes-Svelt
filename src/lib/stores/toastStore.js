@@ -1,92 +1,53 @@
-import { writable } from 'svelte/store';
+import frenchToast from 'svelte-french-toast';
 
-// Store para notificaciones toast [[memory:7706467]]
-export const toasts = writable([]);
-
-// Tipos de toast
-export const TOAST_TYPES = {
-	SUCCESS: 'success',
-	ERROR: 'error',
-	WARNING: 'warning',
-	INFO: 'info'
-};
-
-// Configuración por defecto
-const DEFAULT_DURATION = 5000; // 5 segundos
-const MAX_TOASTS = 5; // Máximo 5 toasts visibles
-
-let toastId = 0;
-
-// Funciones para manejar toasts
+// Funciones wrapper para mantener compatibilidad con la API anterior
 export const toastActions = {
-	// Agregar toast
-	add: (message, type = TOAST_TYPES.INFO, duration = DEFAULT_DURATION, options = {}) => {
-		const id = ++toastId;
-		const toast = {
-			id,
-			message,
-			type,
-			duration,
-			timestamp: new Date(),
-			dismissible: options.dismissible !== false,
-			persistent: options.persistent === true,
-			...options
-		};
-
-		toasts.update(currentToasts => {
-			const newToasts = [toast, ...currentToasts];
-			// Limitar el número de toasts
-			return newToasts.slice(0, MAX_TOASTS);
-		});
-
-		// Auto-remover después del tiempo especificado (si no es persistente)
-		if (!toast.persistent && duration > 0) {
-			setTimeout(() => {
-				toastActions.remove(id);
-			}, duration);
-		}
-
-		return id;
-	},
-
-	// Remover toast por ID
-	remove: (id) => {
-		toasts.update(currentToasts => 
-			currentToasts.filter(toast => toast.id !== id)
-		);
-	},
-
-	// Limpiar todos los toasts
-	clear: () => {
-		toasts.set([]);
-	},
-
-	// Métodos de conveniencia
 	success: (message, options = {}) => {
-		return toastActions.add(message, TOAST_TYPES.SUCCESS, DEFAULT_DURATION, options);
+		return frenchToast.success(message, {
+			duration: 5000,
+			icon: '✅',
+			...options
+		});
 	},
 
 	error: (message, options = {}) => {
-		return toastActions.add(message, TOAST_TYPES.ERROR, 8000, { // Errores duran más
-			...options,
-			dismissible: true
+		return frenchToast.error(message, {
+			duration: 8000,
+			icon: '❌',
+			...options
 		});
 	},
 
 	warning: (message, options = {}) => {
-		return toastActions.add(message, TOAST_TYPES.WARNING, 6000, options);
+		return frenchToast(message, {
+			duration: 6000,
+			icon: '⚠️',
+			style: 'background: #f59e0b; color: white;',
+			...options
+		});
 	},
 
 	info: (message, options = {}) => {
-		return toastActions.add(message, TOAST_TYPES.INFO, DEFAULT_DURATION, options);
+		return frenchToast(message, {
+			duration: 5000,
+			icon: 'ℹ️',
+			style: 'background: #3b82f6; color: white;',
+			...options
+		});
+	},
+
+	// Limpiar todos los toasts
+	clear: () => {
+		frenchToast.dismiss();
 	},
 
 	// Para reemplazar console.log
 	log: (message, data = null) => {
 		const fullMessage = data ? `${message}: ${JSON.stringify(data)}` : message;
-		return toastActions.info(fullMessage, { persistent: false });
+		return toastActions.info(fullMessage);
 	}
 };
 
-// Función global para reemplazar console.log
+// Exportar toastActions como toast para compatibilidad
 export const toast = toastActions;
+export default toastActions;
