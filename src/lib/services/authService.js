@@ -2,94 +2,69 @@ import api from './api.js';
 import { toast } from '$lib/stores/toastStore.js';
 import { browser } from '$app/environment';
 
-// Servicio de autenticación [[memory:7706467]]
+// Servicio de autenticación
 export const authService = {
-	// Login usando endpoint de usuarios
+	// Login usando endpoint específico /api/usuarios/login
 	login: async (credentials) => {
 		try {
-			// Intentar login con endpoint dedicado que incluye password
-			let response;
+			// Intentar login con el endpoint específico /api/usuarios/login
+			const response = await api.post('/api/usuarios/login', {
+				username: credentials.username || credentials.email,
+				password: credentials.password
+			});
 			
-			try {
-				// Intentar con diferentes endpoints posibles de login
-				response = await api.post('/api/login', {
-					username: credentials.username,
-					password: credentials.password
-				});
-			} catch (loginError) {
-				try {
-					// Intentar con auth/login
-					response = await api.post('/api/auth', {
-						username: credentials.username,
-						password: credentials.password
-					});
-				} catch (authError) {
-					try {
-						// Intentar con usuarios/login
-						response = await api.post('/api/usuarios/login', {
-							username: credentials.username,
-							password: credentials.password
-						});
-					} catch (usuariosLoginError) {
-						// Si no hay endpoint de login, verificar manualmente
-						// NOTA: Esto no es seguro para producción
-						const usuariosResponse = await api.get('/api/usuarios');
-						const usuarios = usuariosResponse.data.data || [];
-						
-						// Buscar usuario
-						const usuario = usuarios.find(u => 
-							u.username === credentials.username || u.username === credentials.email
-						);
-						
-						if (!usuario) {
-							throw new Error('Usuario no encontrado');
-						}
-						
-						// Verificación básica: username debe coincidir con password para admin
-						// En tu caso: admin/admin
-						if (usuario.username === 'admin' && credentials.password !== 'admin') {
-							throw new Error('Credenciales inválidas');
-						}
-						
-						// Simular respuesta exitosa
-						response = {
-							data: {
-								success: true,
-								token: `jwt-${usuario.username}-${Date.now()}`,
-								user: {
-									id: usuario.id,
-									username: usuario.username,
-									email: usuario.email || `${usuario.username}@empresa.com`,
-									name: usuario.name || usuario.username.charAt(0).toUpperCase() + usuario.username.slice(1)
-								}
-							}
-						};
-					}
-				}
+			// Extraer token y datos del usuario de la respuesta
+			// La respuesta tiene la estructura: { success: true, message: "...", data: { usuario: {...}, token: "..." } }
+			const { data } = response.data;
+			
+			if (!data || !data.token) {
+				throw new Error('No se recibió token de autenticación');
 			}
 			
-			const { token, user } = response.data;
+			const token = data.token;
+			const usuario = data.usuario;
 			
-			// Guardar token y usuario en localStorage (solo en navegador)
-			if (browser) {
-				localStorage.setItem('token', token);
-				localStorage.setItem('user', JSON.stringify(user));
-			}
+			// Mapear la estructura del usuario para consistencia
+			const user = {
+				id: usuario.id,
+				username: usuario.username,
+				email: usuario.email || `${usuario.username}@empresa.com`,
+				name: usuario.name || usuario.username.charAt(0).toUpperCase() + usuario.username.slice(1)
+			};
 			
-			toast.success(`¡Bienvenido, ${user.name || user.username}!`);
+			// Guardar token y usuario usando el método centralizado
+			authService.saveToken(token, user, true); // true = localStorage (persistente)
+			
+			toast.success(`¡Bienvenido, ${user.name}!`);
 			return { token, user };
 			
 		} catch (error) {
-			toast.error(`Error de autenticación: ${error.message}`);
-			throw error;
+			// Manejo específico de errores de autenticación
+			let errorMessage = 'Error de autenticación';
+			
+			if (error.response?.status === 401) {
+				errorMessage = 'Credenciales inválidas';
+			} else if (error.response?.status === 404) {
+				errorMessage = 'Endpoint de login no encontrado';
+			} else if (error.response?.status >= 500) {
+				errorMessage = 'Error del servidor. Intenta más tarde';
+			} else if (error.message) {
+				errorMessage = error.message;
+			}
+			
+			toast.error(errorMessage);
+			throw new Error(errorMessage);
 		}
 	},
 
-	// Logout
+	// Logout - limpia token y datos del usuario
 	logout: () => {
 		if (browser) {
+			// Limpiar tanto localStorage como sessionStorage por seguridad
 			localStorage.removeItem('token');
 			localStorage.removeItem('user');
+			sessionStorage.removeItem('token');
+			sessionStorage.removeItem('user');
 		}
 		toast.info('Sesión cerrada exitosamente');
 	},
@@ -97,7 +72,11 @@ export const authService = {
 	// Obtener usuario actual
 	getCurrentUser: () => {
 		if (browser) {
-			const userStr = localStorage.getItem('user');
+			// Intentar primero localStorage, luego sessionStorage
+			let userStr = localStorage.getItem('user');
+			if (!userStr) {
+				userStr = sessionStorage.getItem('user');
+			}
 			return userStr ? JSON.parse(userStr) : null;
 		}
 		return null;
@@ -106,7 +85,8 @@ export const authService = {
 	// Verificar si está autenticado
 	isAuthenticated: () => {
 		if (browser) {
-			return !!localStorage.getItem('token');
+			// Verificar en localStorage y sessionStorage
+			return !!(localStorage.getItem('token') || sessionStorage.getItem('token'));
 		}
 		return false;
 	},
@@ -114,9 +94,19 @@ export const authService = {
 	// Obtener token
 	getToken: () => {
 		if (browser) {
-			return localStorage.getItem('token');
+			// Intentar primero localStorage, luego sessionStorage
+			return localStorage.getItem('token') || sessionStorage.getItem('token');
 		}
 		return null;
+	},
+
+	// Guardar token con opción de persistencia
+	saveToken: (token, user, persistent = true) => {
+		if (browser) {
+			const storage = persistent ? localStorage : sessionStorage;
+			storage.setItem('token', token);
+			storage.setItem('user', JSON.stringify(user));
+		}
 	},
 
 	// Verificar token válido

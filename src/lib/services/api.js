@@ -14,15 +14,19 @@ const api = axios.create({
 // Interceptor para requests
 api.interceptors.request.use(
 	(config) => {
-		// Solo acceder a localStorage en el navegador
+		// Solo acceder a storage en el navegador
 		if (browser) {
-			const token = localStorage.getItem('token');
+			// Intentar obtener token de localStorage o sessionStorage
+			const token = localStorage.getItem('token') || sessionStorage.getItem('token');
 			if (token) {
 				config.headers.Authorization = `Bearer ${token}`;
 			}
 		}
 		
-		toast.info(`API Request: ${config.method?.toUpperCase()} ${config.url}`);
+		// Solo mostrar toast para requests importantes (no para verificaciones automáticas)
+		if (!config.url?.includes('/verify') && !config.url?.includes('/health')) {
+			toast.info(`API Request: ${config.method?.toUpperCase()} ${config.url}`);
+		}
 		return config;
 	},
 	(error) => {
@@ -34,18 +38,36 @@ api.interceptors.request.use(
 // Interceptor para responses
 api.interceptors.response.use(
 	(response) => {
-		toast.success(`API Response: ${response.status} ${response.statusText}`);
+		// Solo mostrar toast para responses importantes
+		if (!response.config?.url?.includes('/verify') && !response.config?.url?.includes('/health')) {
+			toast.success(`API Response: ${response.status} ${response.statusText}`);
+		}
 		return response;
 	},
 	(error) => {
 		const status = error.response?.status || 'Sin conexión';
-		toast.error(`Error en response: ${status} - ${error.message}`);
 		
 		// Manejo de errores comunes
 		if (error.response?.status === 401 && browser) {
-			// Token expirado o no válido
+			// Token expirado o no válido - limpiar ambos storages
 			localStorage.removeItem('token');
-			window.location.href = '/login';
+			localStorage.removeItem('user');
+			sessionStorage.removeItem('token');
+			sessionStorage.removeItem('user');
+			
+			// Redirigir al login solo si no estamos ya en la página de login
+			if (window.location.pathname !== '/login') {
+				toast.error('Sesión expirada. Por favor, inicia sesión nuevamente.');
+				window.location.href = '/login';
+			}
+		} else if (error.response?.status >= 500) {
+			toast.error(`Error del servidor (${status}). Intenta más tarde.`);
+		} else if (error.response?.status === 404) {
+			toast.error(`Recurso no encontrado (${status})`);
+		} else if (error.response?.status >= 400) {
+			toast.error(`Error en la petición (${status}): ${error.message}`);
+		} else {
+			toast.error(`Error de conexión: ${error.message}`);
 		}
 		
 		return Promise.reject(error);

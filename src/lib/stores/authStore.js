@@ -11,10 +11,11 @@ export const authStore = writable({
 	error: null
 });
 
-// Inicializar store desde localStorage si está en el navegador
+// Inicializar store desde storage si está en el navegador
 if (browser) {
-	const token = localStorage.getItem('token');
-	const userStr = localStorage.getItem('user');
+	// Intentar obtener token y usuario de localStorage o sessionStorage
+	const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+	const userStr = localStorage.getItem('user') || sessionStorage.getItem('user');
 	
 	if (token && userStr) {
 		try {
@@ -27,9 +28,11 @@ if (browser) {
 				error: null
 			});
 		} catch (error) {
-			// Si hay error al parsear, limpiar localStorage
+			// Si hay error al parsear, limpiar ambos storages
 			localStorage.removeItem('token');
 			localStorage.removeItem('user');
+			sessionStorage.removeItem('token');
+			sessionStorage.removeItem('user');
 		}
 	}
 }
@@ -66,9 +69,35 @@ export const authActions = {
 		}
 	},
 
-	// Logout
+	// Logout - limpia completamente la sesión
 	logout: () => {
+		// Limpiar storage usando el servicio
 		authService.logout();
+		
+		// Limpiar el store
+		authStore.set({
+			user: null,
+			token: null,
+			isAuthenticated: false,
+			loading: false,
+			error: null
+		});
+		
+		// Redirigir al login si no estamos ya ahí
+		if (browser && window.location.pathname !== '/login') {
+			window.location.href = '/login';
+		}
+	},
+
+	// Logout silencioso (sin redirección ni toast)
+	logoutSilent: () => {
+		if (browser) {
+			localStorage.removeItem('token');
+			localStorage.removeItem('user');
+			sessionStorage.removeItem('token');
+			sessionStorage.removeItem('user');
+		}
+		
 		authStore.set({
 			user: null,
 			token: null,
@@ -87,11 +116,12 @@ export const authActions = {
 	checkAuth: async () => {
 		if (!browser) return;
 		
-		const token = localStorage.getItem('token');
-		const userStr = localStorage.getItem('user');
+		// Intentar obtener token y usuario de ambos storages
+		const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+		const userStr = localStorage.getItem('user') || sessionStorage.getItem('user');
 		
 		if (!token || !userStr) {
-			authActions.logout();
+			authActions.logoutSilent();
 			return;
 		}
 		
@@ -99,11 +129,41 @@ export const authActions = {
 			// Verificar si el token sigue siendo válido
 			const isValid = await authService.verifyToken();
 			if (!isValid) {
-				authActions.logout();
+				authActions.logoutSilent();
 			}
 		} catch (error) {
 			// Si hay error en verificación, hacer logout silencioso
-			authActions.logout();
+			console.warn('Error verificando token:', error.message);
+			authActions.logoutSilent();
+		}
+	},
+
+	// Verificar autenticación sin hacer petición al servidor
+	checkAuthLocal: () => {
+		if (!browser) return false;
+		
+		const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+		const userStr = localStorage.getItem('user') || sessionStorage.getItem('user');
+		
+		if (!token || !userStr) {
+			authActions.logoutSilent();
+			return false;
+		}
+		
+		try {
+			const user = JSON.parse(userStr);
+			authStore.update(store => ({
+				...store,
+				user,
+				token,
+				isAuthenticated: true,
+				loading: false,
+				error: null
+			}));
+			return true;
+		} catch (error) {
+			authActions.logoutSilent();
+			return false;
 		}
 	},
 
