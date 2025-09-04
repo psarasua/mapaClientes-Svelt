@@ -1,6 +1,11 @@
 import { writable } from 'svelte/store';
 import { browser } from '$app/environment';
+import { localStorageStore } from '../utils/stores.js';
 import { authService } from '../services/authService.js';
+
+// Stores persistentes con svelte-legos
+export const tokenStore = localStorageStore('token', null);
+export const userStore = localStorageStore('user', null);
 
 // Store para autenticación [[memory:7706467]]
 export const authStore = writable({
@@ -11,30 +16,39 @@ export const authStore = writable({
 	error: null
 });
 
-// Inicializar store desde storage si está en el navegador
+// Inicializar store desde localStorage reactivo
 if (browser) {
-	// Intentar obtener token y usuario de localStorage o sessionStorage
-	const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-	const userStr = localStorage.getItem('user') || sessionStorage.getItem('user');
-	
-	if (token && userStr) {
-		try {
-			const user = JSON.parse(userStr);
-			authStore.set({
-				user,
-				token,
-				isAuthenticated: true,
-				loading: false,
-				error: null
-			});
-		} catch (error) {
-			// Si hay error al parsear, limpiar ambos storages
-			localStorage.removeItem('token');
-			localStorage.removeItem('user');
-			sessionStorage.removeItem('token');
-			sessionStorage.removeItem('user');
-		}
-	}
+	// Suscribirse a cambios en localStorage
+	tokenStore.subscribe(token => {
+		userStore.subscribe(userStr => {
+			if (token && userStr) {
+				try {
+					const user = typeof userStr === 'string' ? JSON.parse(userStr) : userStr;
+					authStore.update(store => ({
+						...store,
+						user,
+						token,
+						isAuthenticated: true,
+						loading: false,
+						error: null
+					}));
+				} catch (error) {
+					// Si hay error al parsear, limpiar stores
+					tokenStore.set(null);
+					userStore.set(null);
+				}
+			} else {
+				authStore.update(store => ({
+					...store,
+					user: null,
+					token: null,
+					isAuthenticated: false,
+					loading: false,
+					error: null
+				}));
+			}
+		});
+	});
 }
 
 // Acciones de autenticación
@@ -45,6 +59,10 @@ export const authActions = {
 		
 		try {
 			const { token, user } = await authService.login(credentials);
+			
+			// Guardar en stores persistentes de svelte-legos
+			tokenStore.set(token);
+			userStore.set(user);
 			
 			authStore.update(store => ({
 				...store,
@@ -71,17 +89,12 @@ export const authActions = {
 
 	// Logout - limpia completamente la sesión
 	logout: () => {
-		// Limpiar storage usando el servicio
-		authService.logout();
+		// Limpiar stores de svelte-legos
+		tokenStore.set(null);
+		userStore.set(null);
 		
-		// Limpiar el store
-		authStore.set({
-			user: null,
-			token: null,
-			isAuthenticated: false,
-			loading: false,
-			error: null
-		});
+		// Limpiar storage usando el servicio (para sessionStorage)
+		authService.logout();
 		
 		// Redirigir al login si no estamos ya ahí
 		if (browser && window.location.pathname !== '/login') {
@@ -91,20 +104,15 @@ export const authActions = {
 
 	// Logout silencioso (sin redirección ni toast)
 	logoutSilent: () => {
+		// Limpiar stores de svelte-legos
+		tokenStore.set(null);
+		userStore.set(null);
+		
+		// Limpiar sessionStorage manualmente
 		if (browser) {
-			localStorage.removeItem('token');
-			localStorage.removeItem('user');
 			sessionStorage.removeItem('token');
 			sessionStorage.removeItem('user');
 		}
-		
-		authStore.set({
-			user: null,
-			token: null,
-			isAuthenticated: false,
-			loading: false,
-			error: null
-		});
 	},
 
 	// Limpiar errores

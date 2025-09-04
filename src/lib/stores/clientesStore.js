@@ -1,5 +1,7 @@
 import { writable } from 'svelte/store';
+import { debounceStore } from '../utils/stores.js';
 import { clientesService } from '../services/clientesService.js';
+import Fuse from 'fuse.js';
 
 // Store para clientes [[memory:7706467]]
 export const clientesStore = writable({
@@ -16,8 +18,24 @@ export const clientesStore = writable({
 	// Paginación
 	currentPage: 1,
 	itemsPerPage: 10,
-	totalPages: 0
+	totalPages: 0,
+	// Índice de búsqueda Fuse.js
+	fuseIndex: null
 });
+
+// Configuración de búsqueda Fuse.js para clientes
+const fuseOptions = {
+	keys: [
+		{ name: 'nombre', weight: 2 }, // Prioridad alta al nombre
+		{ name: 'razonsocial', weight: 1.5 },
+		{ name: 'direccion', weight: 1 },
+		{ name: 'telefono', weight: 0.5 },
+		{ name: 'email', weight: 0.5 }
+	],
+	threshold: 0.3,
+	includeScore: true,
+	includeMatches: true
+};
 
 // Funciones para manejar el store
 export const clientesActions = {
@@ -29,6 +47,9 @@ export const clientesActions = {
 			const response = await clientesService.getAll();
 			clientesStore.update(store => {
 				const newData = response.data || [];
+				// Crear índice Fuse.js para búsqueda avanzada
+				const fuseIndex = newData.length > 0 ? new Fuse(newData, fuseOptions) : null;
+				
 				return {
 					...store,
 					data: newData,
@@ -36,7 +57,8 @@ export const clientesActions = {
 					count: response.count || 0,
 					loading: false,
 					error: null,
-					totalPages: Math.ceil(newData.length / store.itemsPerPage)
+					totalPages: Math.ceil(newData.length / store.itemsPerPage),
+					fuseIndex
 				};
 			});
 		} catch (error) {
@@ -110,19 +132,29 @@ export const clientesActions = {
 		clientesStore.update(store => ({ ...store, error: null }));
 	},
 
-	// Funcionalidades avanzadas específicas para clientes
-	// Búsqueda avanzada
+	// Búsqueda avanzada con Fuse.js
 	setSearchTerm: (searchTerm) => {
 		clientesStore.update(store => {
-			let filtered = store.data.filter(cliente =>
-				cliente.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				cliente.razonsocial.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				cliente.codigoalte.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				cliente.direccion.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				cliente.telefono.includes(searchTerm) ||
-				cliente.rut.includes(searchTerm) ||
-				cliente.id.toString().includes(searchTerm)
-			);
+			let filtered = store.data;
+			
+			if (searchTerm && searchTerm.trim() !== '') {
+				// Usar Fuse.js para búsqueda inteligente
+				if (store.fuseIndex) {
+					const searchResults = store.fuseIndex.search(searchTerm);
+					filtered = searchResults.map(result => result.item);
+				} else {
+					// Fallback a búsqueda básica si no hay índice
+					filtered = store.data.filter(cliente =>
+						cliente.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+						cliente.razonsocial.toLowerCase().includes(searchTerm.toLowerCase()) ||
+						cliente.codigoalte.toLowerCase().includes(searchTerm.toLowerCase()) ||
+						cliente.direccion.toLowerCase().includes(searchTerm.toLowerCase()) ||
+						cliente.telefono.includes(searchTerm) ||
+						cliente.rut.includes(searchTerm) ||
+						cliente.id.toString().includes(searchTerm)
+					);
+				}
+			}
 			
 			// Aplicar filtro de estado si está activo
 			if (store.filterByEstado !== 'todos') {
