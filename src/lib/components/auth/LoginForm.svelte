@@ -15,12 +15,16 @@
 		password: ''
 	};
 	
-	let errors = {};
+	let errors = {
+		email: '',
+		password: ''
+	};
 	let showPassword = false;
 	
 	// Validar formulario
 	const validateForm = () => {
-		errors = {};
+		errors.email = '';
+		errors.password = '';
 		
 		if (!formData.email.trim()) {
 			errors.email = 'El usuario es obligatorio';
@@ -74,9 +78,10 @@
 	
 	// Limpiar errores cuando el usuario escribe
 	const clearFieldError = (field) => {
-		if (errors[field]) {
-			errors = { ...errors };
-			delete errors[field];
+		if (field === 'email') {
+			errors.email = '';
+		} else if (field === 'password') {
+			errors.password = '';
 		}
 		authActions.clearError();
 	};
@@ -87,94 +92,92 @@
 	};
 </script>
 
-<div class="card shadow-lg border-0">
-	<div class="card-header bg-primary text-white text-center py-4">
-		<i class="bi bi-shield-lock display-4 mb-3"></i>
-		<h3 class="mb-0">Iniciar Sesión</h3>
-		<p class="mb-0 opacity-75">Accede a tu sistema de gestión</p>
-	</div>
-	
-	<div class="card-body p-4">
-		<form on:submit|preventDefault={handleSubmit}>
+<div class="login-container fade-in">
+	<div class="login-form">
+		<!-- Logo -->
+		<div class="logo-section">
+			<div class="logo">
+				<div class="logo-cubes">
+					<div class="cube cube-1"></div>
+					<div class="cube cube-2"></div>
+					<div class="cube cube-3"></div>
+				</div>
+				<span class="logo-text">LogiFlow</span>
+			</div>
+		</div>
+		
+		<!-- Título -->
+		<div class="form-title">
+			<h2>Inicia sesión en tu cuenta</h2>
+		</div>
+		
+		<div class="form-content">
+			<form on:submit|preventDefault={handleSubmit}>
 			<!-- Usuario -->
-			<div class="mb-3">
-				<label for="email" class="form-label">
-					<i class="bi bi-person me-1"></i>
-					Usuario *
-				</label>
+			<div class="form-group">
 				<input 
 					type="text" 
-					class="form-control form-control-lg {errors.email ? 'is-invalid' : ''}" 
+					class="form-input {errors.email ? 'error' : ''}" 
 					id="email"
 					bind:value={formData.email}
 					on:input={() => clearFieldError('email')}
 					on:keydown={handleKeydown}
-					placeholder="admin"
+					placeholder="Usuario"
 					disabled={loading}
 					autocomplete="username"
 					required
 				/>
 				{#if errors.email}
-					<div class="invalid-feedback">{errors.email}</div>
+					<div class="error-message">{errors.email}</div>
 				{/if}
-				<div class="form-text">
-					<i class="bi bi-info-circle me-1"></i>
-					Usuario: <code>admin</code>
-				</div>
 			</div>
 			
 			<!-- Contraseña -->
-			<div class="mb-4">
-				<label for="password" class="form-label">
-					<i class="bi bi-key me-1"></i>
-					Contraseña *
-				</label>
-				<div class="input-group">
-					{#if showPassword}
-						<input 
-							type="text"
-							class="form-control form-control-lg {errors.password ? 'is-invalid' : ''}" 
-							id="password"
-							bind:value={formData.password}
-							on:input={() => clearFieldError('password')}
-							on:keydown={handleKeydown}
-							placeholder="admin"
-							disabled={loading}
-							autocomplete="current-password"
-							required
-						/>
-					{:else}
-						<input 
-							type="password"
-							class="form-control form-control-lg {errors.password ? 'is-invalid' : ''}" 
-							id="password"
-							bind:value={formData.password}
-							on:input={() => clearFieldError('password')}
-							on:keydown={handleKeydown}
-							placeholder="admin"
-							disabled={loading}
-							autocomplete="current-password"
-							required
-						/>
-					{/if}
-					<button 
-						class="btn btn-outline-secondary" 
-						type="button"
-						on:click={() => showPassword = !showPassword}
+			<div class="form-group">
+				{#if showPassword}
+					<input 
+						type="text"
+						class="form-input {errors.password ? 'error' : ''}" 
+						id="password"
+						bind:value={formData.password}
+						on:input={() => clearFieldError('password')}
+						on:keydown={handleKeydown}
+						placeholder="Contraseña"
 						disabled={loading}
-					>
-						<i class="bi bi-eye{showPassword ? '-slash' : ''}"></i>
-					</button>
-				</div>
+						autocomplete="current-password"
+						required
+					/>
+				{:else}
+					<input 
+						type="password"
+						class="form-input {errors.password ? 'error' : ''}" 
+						id="password"
+						bind:value={formData.password}
+						on:input={() => clearFieldError('password')}
+						on:keydown={handleKeydown}
+						placeholder="Contraseña"
+						disabled={loading}
+						autocomplete="current-password"
+						required
+					/>
+				{/if}
+				<button 
+					class="password-toggle" 
+					type="button"
+					on:click={() => showPassword = !showPassword}
+					disabled={loading}
+				>
+					<i class="bi bi-eye{showPassword ? '-slash' : ''}"></i>
+				</button>
 				{#if errors.password}
-					<div class="invalid-feedback d-block">{errors.password}</div>
+					<div class="error-message">{errors.password}</div>
 				{/if}
 			</div>
 			
 			<!-- Error general -->
 			{#if error}
-				<div class="alert alert-danger">
-					<i class="bi bi-exclamation-triangle me-2"></i>
+				<div class="error-alert">
+					<i class="bi bi-exclamation-triangle"></i>
 					{error}
 				</div>
 			{/if}
@@ -182,36 +185,36 @@
 			<!-- Botón de login -->
 			<button 
 				type="submit" 
-				class="btn btn-primary btn-lg w-100 mb-3"
+				class="login-button"
 				disabled={loading}
 			>
 				{#if loading}
-					<span class="spinner-border spinner-border-sm me-2" role="status"></span>
-					Verificando credenciales...
+					<span class="spinner"></span>
+					Verificando...
 				{:else}
-					<i class="bi bi-box-arrow-in-right me-2"></i>
-					Iniciar Sesión
+					INICIAR SESIÓN
 				{/if}
 			</button>
-		</form>
+			</form>
+		</div>
 		
-		<!-- Información de ayuda -->
-		<div class="text-center">
+		<!-- Enlaces -->
+		<div class="form-links">
 			<button 
 				type="button"
-				class="btn btn-link btn-sm text-muted"
+				class="link-button"
 				on:click={showDemoCredentials}
 			>
-				<i class="bi bi-info-circle me-1"></i>
-				¿Necesitas ayuda con las credenciales?
+				¿Olvidaste tu contraseña?
 			</button>
+			<div class="register-link">
+				¿No tienes una cuenta? <a href="/register" class="register-text">Regístrate aquí</a>
+			</div>
 		</div>
-	</div>
-	
-	<div class="card-footer bg-light text-center">
-		<small class="text-muted">
-			<i class="bi bi-shield-check me-1"></i>
-			Sistema seguro de autenticación
-		</small>
+		
+		<!-- Footer -->
+		<div class="form-footer">
+			<small>Términos de uso. Política de privacidad</small>
+		</div>
 	</div>
 </div>

@@ -12,20 +12,27 @@
 	};
 </script>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+<nav class="navbar navbar-expand-lg sticky-top">
 	<div class="container">
 		<a class="navbar-brand" href="/">
-			<i class="bi bi-house-door me-2"></i>
-			Mi Frontend
+			<div class="logo">
+				<div class="logo-cubes">
+					<div class="cube cube-1"></div>
+					<div class="cube cube-2"></div>
+					<div class="cube cube-3"></div>
+				</div>
+				<span class="logo-text">LogiFlow</span>
+			</div>
 		</a>
 		
 		<button 
-			class="navbar-toggler" 
+			class="navbar-toggler border-0" 
 			type="button" 
 			data-bs-toggle="collapse" 
 			data-bs-target="#navbarNav"
+			style="border: none !important; box-shadow: none !important;"
 		>
-			<span class="navbar-toggler-icon"></span>
+			<span class="navbar-toggler-icon" style="background-image: url('data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 30 30\'%3e%3cpath stroke=\'rgba%28255, 255, 255, 0.8%29\' stroke-linecap=\'round\' stroke-miterlimit=\'10\' stroke-width=\'2\' d=\'M4 7h22M4 15h22M4 23h22\'/%3e%3c/svg%3e') !important;"></span>
 		</button>
 		
 		<div class="collapse navbar-collapse" id="navbarNav">
@@ -36,7 +43,7 @@
 						href="/"
 					>
 						<i class="bi bi-house me-1"></i>
-						Inicio
+						Dashboard
 					</a>
 				</li>
 				
@@ -103,18 +110,18 @@
 							<i class="bi bi-person-circle me-1"></i>
 							{user.name || user.username}
 						</a>
-						<ul class="dropdown-menu dropdown-menu-end">
+						<ul class="dropdown-menu dropdown-menu-end shadow-lg" style="border: none; border-radius: var(--radius-lg);">
 							<li>
-								<span class="dropdown-item-text">
-									<small class="text-muted">
-										<i class="bi bi-envelope me-1"></i>
+								<span class="dropdown-item-text px-3 py-2">
+									<small class="text-muted d-flex align-items-center">
+										<i class="bi bi-envelope me-2"></i>
 										{user.email || 'Email no disponible'}
 									</small>
 								</span>
 							</li>
-							<li><hr class="dropdown-divider"></li>
+							<li><hr class="dropdown-divider my-2"></li>
 							<li>
-								<button class="dropdown-item" on:click={handleLogout}>
+								<button class="dropdown-item px-3 py-2" on:click={handleLogout} style="transition: all 0.2s ease;">
 									<i class="bi bi-box-arrow-right me-2"></i>
 									Cerrar Sesión
 								</button>

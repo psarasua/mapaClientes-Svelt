@@ -51,15 +51,18 @@
 
 {#if show}
 	<!-- Modal Backdrop -->
+	<!-- svelte-ignore a11y-click-events-have-key-events -->
+	<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 	<div 
 		class="modal fade show d-block" 
 		tabindex="-1" 
 		style="background-color: rgba(0,0,0,0.5);"
-		on:click={handleBackdropClick}
-		on:keydown={handleKeydown}
 		role="dialog"
 		aria-labelledby="camionModalLabel"
 		aria-hidden="false"
+		aria-modal="true"
+		on:click={handleBackdropClick}
+		on:keydown={handleKeydown}
 	>
 		<div class="modal-dialog modal-dialog-centered">
 			<div class="modal-content">

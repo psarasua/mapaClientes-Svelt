@@ -198,7 +198,7 @@
 	
 	// Obtener clase CSS para el estado
 	const getEstadoClass = (estado) => {
-		return estado === 'Activo' ? 'bg-success' : 'bg-secondary';
+		return estado === 'Activo' ? 'badge-success-modern' : 'badge-warning-modern';
 	};
 </script>
 
@@ -221,13 +221,13 @@
 	on:refresh={handleRefresh}
 />
 
-<div class="card">
-	<div class="card-header">
-		<h5 class="mb-0">
-			<i class="bi bi-person-badge me-2"></i>
+<div class="card-modern">
+	<div class="card-header-modern">
+		<h5 class="mb-0 d-flex align-items-center">
+			<i class="bi bi-person-badge me-2 text-primary"></i>
 			Lista de Clientes
 			{#if clientes.length > 0}
-				<span class="badge bg-primary ms-2">{clientes.length}</span>
+				<span class="badge badge-primary-modern ms-2">{clientes.length}</span>
 				{#if searchTerm || filterByEstado !== 'todos'}
 					<small class="text-muted ms-2">de {count} total</small>
 				{/if}
@@ -235,7 +235,7 @@
 		</h5>
 	</div>
 	
-	<div class="card-body">
+	<div class="card-body-modern">
 		{#if error}
 			<ErrorMessage 
 				message={error} 
@@ -266,7 +266,7 @@
 			</div>
 		{:else}
 			<div class="table-responsive">
-				<table class="table table-hover">
+				<table class="table table-modern table-hover">
 					<thead class="table-light">
 						<tr>
 							<th scope="col">
@@ -303,7 +303,7 @@
 						{#each paginatedClientes as cliente (cliente.id)}
 							<tr class="fade-in">
 								<td>
-									<span class="badge bg-secondary">{cliente.id}</span>
+									<span class="badge badge-primary-modern">{cliente.id}</span>
 								</td>
 								<td>
 									<code class="text-primary">{cliente.codigoalte}</code>
@@ -328,14 +328,14 @@
 									</a>
 								</td>
 								<td>
-									<span class="badge {getEstadoClass(cliente.estado)}">
+									<span class="badge-modern {getEstadoClass(cliente.estado)}">
 										{cliente.estado}
 									</span>
 								</td>
 								<td class="text-center">
 									<div class="btn-group btn-group-sm" role="group">
 										<button 
-											class="btn btn-outline-success" 
+											class="btn btn-outline-success focus-ring" 
 											on:click={() => handleShowMap(cliente)}
 											title="Ver ubicación en mapa"
 											disabled={loading}
@@ -343,7 +343,7 @@
 											<i class="bi bi-geo-alt"></i>
 										</button>
 										<button 
-											class="btn btn-outline-info" 
+											class="btn btn-outline-info focus-ring" 
 											on:click={() => handleViewDetails(cliente)}
 											title="Ver detalles"
 											disabled={loading}
@@ -351,7 +351,7 @@
 											<i class="bi bi-eye"></i>
 										</button>
 										<button 
-											class="btn btn-outline-primary" 
+											class="btn btn-outline-primary focus-ring" 
 											on:click={() => handleEdit(cliente)}
 											title="Editar cliente"
 											disabled={loading}
@@ -359,7 +359,7 @@
 											<i class="bi bi-pencil"></i>
 										</button>
 										<button 
-											class="btn btn-outline-danger" 
+											class="btn btn-outline-danger focus-ring" 
 											on:click={() => handleDelete(cliente)}
 											title="Eliminar cliente"
 											disabled={loading}

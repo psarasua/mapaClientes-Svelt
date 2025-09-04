@@ -1,6 +1,5 @@
 <script>
 	import Header from '../common/Header.svelte';
-	import Footer from '../common/Footer.svelte';
 	import ToastContainer from '../common/ToastContainer.svelte';
 </script>
 
@@ -9,7 +8,6 @@
 	<main class="container flex-grow-1 py-4">
 		<slot />
 	</main>
-	<Footer />
 </div>
 
 <!-- Sistema de notificaciones toast -->

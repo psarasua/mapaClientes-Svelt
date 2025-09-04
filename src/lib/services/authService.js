@@ -109,18 +109,26 @@ export const authService = {
 		}
 	},
 
-	// Verificar token válido
+	// Verificar token válido - usando endpoint de usuarios como verificación
 	verifyToken: async () => {
 		try {
-			const response = await api.get('/api/auth/verify');
-			return response.data;
+			// Usar el endpoint de usuarios para verificar si el token es válido
+			const response = await api.get('/api/usuarios');
+			return response.data ? true : false;
 		} catch (error) {
-			// Si falla la verificación, limpiar datos
-			if (browser) {
-				localStorage.removeItem('token');
-				localStorage.removeItem('user');
+			// Si falla la verificación (401, 403, etc.), el token no es válido
+			if (error.response?.status === 401 || error.response?.status === 403) {
+				// Token expirado o no válido - limpiar datos
+				if (browser) {
+					localStorage.removeItem('token');
+					localStorage.removeItem('user');
+					sessionStorage.removeItem('token');
+					sessionStorage.removeItem('user');
+				}
+				return false;
 			}
-			return false;
+			// Para otros errores (red, servidor), asumir que el token es válido
+			return true;
 		}
 	},
 
